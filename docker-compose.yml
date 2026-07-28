@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    container_name: lensecode-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads:/app/uploads
+    environment:
+      - LENSCODE_PASSWORD=${LENSCODE_PASSWORD:-4omaz}
+      - JWT_SECRET=${JWT_SECRET:-lensecode_gizli_anahtar_2024}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    networks:
+      - lensecode-net
+
+  frontend:
+    build: ./frontend
+    container_name: lensecode-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - lensecode-net
+
+networks:
+  lensecode-net:
+    driver: bridge
+
+volumes:
+  uploads:
