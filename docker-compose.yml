@@ -1,0 +1,46 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        INSTALL_SEMGREP: ${INSTALL_SEMGREP:-0}
+    container_name: lensecode-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads:/app/app/uploads
+    environment:
+      LENSCODE_PASSWORD: ${LENSCODE_PASSWORD:?LENSCODE_PASSWORD .env icinde tanimli olmali}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET .env icinde tanimli olmali}
+      TOKEN_EXPIRY_DAYS: ${TOKEN_EXPIRY_DAYS:-7}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      ENABLE_SEMGREP: ${ENABLE_SEMGREP:-1}
+    networks:
+      - lensecode-net
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    container_name: lensecode-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      BACKEND_URL: http://backend:8000
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    depends_on:
+      - backend
+    networks:
+      - lensecode-net
+
+networks:
+  lensecode-net:
+    driver: bridge
+
+volumes:
+  uploads:

@@ -1,0 +1,4 @@
+# Opsiyonel: derin güvenlik taraması (Semgrep).
+# Kurulum: pip install -r requirements-semgrep.txt
+# Kurulu değilse backend yerleşik (regex tabanlı) tarayıcıya düşer.
+semgrep>=1.60.0
