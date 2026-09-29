@@ -2,6 +2,15 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
+/**
+ * Yalnizca tum rotalarda gecerli olan metadata burada.
+ *
+ * `canonical`, `openGraph.url` ve `robots` bilerek burada tanimli degil:
+ * Next metadata'yi alt segmentlere miras biraktigi icin burada "/" degeri
+ * tum rotalara yayilir ve /app ile /dashboard/* de ana sayfayi isaret eder.
+ * Rota bazli degerler (landing)/layout.tsx, app/layout.tsx ve
+ * dashboard/layout.tsx dosyalarinda.
+ */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -22,13 +31,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "tr_TR",
-    url: "/",
     siteName: SITE_NAME,
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
@@ -37,17 +42,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
   },
   category: "developer",
 };

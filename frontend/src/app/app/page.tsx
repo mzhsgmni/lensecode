@@ -5,9 +5,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FileUploader from "@/components/FileUploader";
 import { login, clearToken, errorMessage } from "@/lib/api";
-import { useToken } from "@/lib/useToken";
+import { useToken, useHydrated } from "@/lib/useToken";
+
+function AuthShell() {
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ background: "radial-gradient(ellipse at center, #12121a 0%, #0a0a0f 100%)" }}
+    >
+      <div className="flex items-center gap-3 text-text-secondary">
+        <div className="w-6 h-6 border-2 border-border border-t-accent rounded-full animate-spin-slow" />
+        <span className="text-sm">Yükleniyor...</span>
+      </div>
+    </div>
+  );
+}
 
 export default function AppPage() {
+  const hydrated = useHydrated();
   const token = useToken();
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -47,6 +62,10 @@ export default function AppPage() {
       setLoading(false);
     }
   };
+
+  if (!hydrated) {
+    return <AuthShell />;
+  }
 
   if (!token) {
     return (

@@ -8,8 +8,14 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # NEXT_PUBLIC_* degerleri derleme aninda gomulur; sitede NEXT_PUBLIC_SITE_URL
-# verilmezse canonical/OG/sitemap localhost'a duser.
-ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# verilmezse canonical/OG/sitemap localhost'a duser ve SEO bozulur. Bu yuzden
+# build arg'i zorunlu tutuluyor: verilmeden build calisirsa hata verir.
+ARG NEXT_PUBLIC_SITE_URL
+RUN test -n "$NEXT_PUBLIC_SITE_URL" || ( \
+      echo "HATA: NEXT_PUBLIC_SITE_URL build arg'i verilmedi."; \
+      echo "Ornek: docker build --build-arg NEXT_PUBLIC_SITE_URL=https://www.siten.com ."; \
+      exit 1 \
+    )
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 RUN npm run build

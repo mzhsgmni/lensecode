@@ -8,7 +8,9 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // Analiz araci giris arkasinda, indekslenmesine gerek yok.
-        disallow: ["/app", "/dashboard/"],
+        // "/dashboard" trailing slash'siz yazildi: REP prefix eslesmesiyle
+        // hem /dashboard hem /dashboard/<id> alt yollarini kapsar.
+        disallow: ["/app", "/dashboard"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

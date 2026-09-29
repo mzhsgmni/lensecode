@@ -5,6 +5,8 @@ export const alt = `${SITE_NAME} — ${SITE_TAGLINE}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Not: next/og yalnizca Geist Regular (400) icerir. fontWeight istekleri
+// sessizce yok sayilir; hiyerarsi puntoda ve renkte kurulur.
 const FEATURES = [
   "Teknoloji tespiti",
   "Güvenlik açığı analizi",
@@ -41,24 +43,23 @@ export default function Image() {
               justifyContent: "center",
               color: "#ffffff",
               fontSize: 40,
-              fontWeight: 700,
             }}
           >
             L
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 44, fontWeight: 700, color: "#e8e8f0" }}>{SITE_NAME}</div>
+            <div style={{ fontSize: 52, color: "#e8e8f0", letterSpacing: -1 }}>{SITE_NAME}</div>
             <div style={{ fontSize: 22, color: "#8888a0" }}>{SITE_TAGLINE}</div>
           </div>
         </div>
 
         <div
           style={{
-            fontSize: 68,
-            fontWeight: 700,
-            color: "#e8e8f0",
+            fontSize: 72,
+            color: "#ffffff",
             lineHeight: 1.15,
             marginBottom: 28,
+            letterSpacing: -2,
           }}
         >
           Projeni yükle, AI mimari analizini al.
