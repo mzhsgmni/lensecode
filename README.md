@@ -75,9 +75,23 @@ Kapatmak için `.env`: `ENABLE_SEMGREP=0`.
 |----------|----------|
 | `LENSCODE_PASSWORD` | Giriş şifresi (zorunlu) |
 | `JWT_SECRET` | Token imza anahtarı, en az 32 bayt (zorunlu) |
+| `LOGIN_MAX_ATTEMPTS` | Başarısız deneme eşiği (varsayılan 5) |
+| `LOGIN_WINDOW_SECONDS` | Kilit süresi saniye (varsayılan 900) |
+| `NEXT_PUBLIC_SITE_URL` | Gerçek site adresi, `www` ile (SEO, zorunlu) |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | LLM analizi (opsiyonel) |
 | `CORS_ORIGINS` | İzinli frontend origin'leri, virgülle (boş=tümü) |
 | `ENABLE_SEMGREP` | `1`/`0` |
+
+### Giriş koruması
+
+Tek paylaşılan şifre olduğu için `/api/auth/login` endpoint'i kendi hız
+sınırlayıcısını taşır. Başarısız denemeler IP başına sayılır; eşik aşılınca o
+IP `LOGIN_WINDOW_SECONDS` boyunca **429** + `Retry-After` ile kilitlenir.
+Başarılı giriş sayacı sıfırlar.
+
+> Sayaçlar süreç belleğinde tutulur. Railway'de replica sayısını **1**'de
+> bırak; birden fazla örnek çalıştırırsan her örnek kendi sayacını tutar ve
+> koruma zayıflar. Ölçek gerekiyorsa Redis gibi paylaşılan bir sayaç kullan.
 
 JWT anahtarı üretmek için:
 
@@ -114,8 +128,29 @@ Yayına almadan önce `.env` (veya Railway/VPS değişkenleri) içinde
 **`NEXT_PUBLIC_SITE_URL`** degerini gercek site adresiyle doldurun:
 
 ```
-NEXT_PUBLIC_SITE_URL=https://siteadiniz.com
+NEXT_PUBLIC_SITE_URL=https://www.siteadiniz.com
 ```
+
+### `www` adresi önemli
+
+`www.siteadiniz.com` ve `siteadiniz.com` Google için **iki ayrı adrestir**.
+İkisi de 200 dönerse linklerin otoritesi bölünür ("duplicate content").
+
+Yapmanız gereken:
+
+1. DNS'te `www` için CNAME kaydı açın.
+2. **Tek** varyantı seçin ve `NEXT_PUBLIC_SITE_URL` olarak onu yazın.
+3. Diğer varyantı **301** ile yönlendirin (302 değil, kalıcı yönlendirme
+   sinyali verir):
+   ```nginx
+   server {
+       server_name siteadiniz.com;
+       return 301 https://www.siteadiniz.com$request_uri;
+   }
+   ```
+4. `NEXT_PUBLIC_SITE_URL` Docker'da **zorunlu build arg**'dır. Verilmeden
+   `docker build` hata verir; böylece production'da yanlışlıkla `localhost`
+   adresleri basılması engellenir.
 
 Bu deger `canonical`, Open Graph, Twitter kartlari, `sitemap.xml` ve
 `robots.txt` icin kullanilir. Ayni degeri frontend servisine de vermeniz gerekir.
