@@ -29,13 +29,23 @@ const HOP_BY_HOP = new Set([
   "upgrade",
   "host",
   "content-length",
+  // Node'un fetch'i (undici) "Expect" basligini desteklemez ve
+  // UND_ERR_NOT_SUPPORTED ile hata verir. curl gibi istemciler ve
+  // bazi proxy'ler govde gonderirken "Expect: 100-continue" ekler.
+  "expect",
 ]);
+
+// Icerik kodlamasi: govdeyi donusturdugumuz icin upstream'den gelen
+// deger yine tekrar uygulanmamali.
+const DROP_FROM_RESPONSE = new Set([...HOP_BY_HOP, "content-encoding"]);
 
 function forwardHeaders(req: NextRequest): Headers {
   const headers = new Headers();
   for (const [key, value] of req.headers) {
     if (!HOP_BY_HOP.has(key.toLowerCase())) headers.set(key, value);
   }
+  // get/set-cookie tekil basliklar; set-cookie birden fazla olabilir
+  if (req.headers.get("cookie")) headers.set("cookie", req.headers.get("cookie")!);
   return headers;
 }
 
@@ -52,11 +62,9 @@ async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }
     redirect: "manual",
   });
 
-  // Yanitin body'sini okunabilir sekilde dondur; Set-Cookie gibi basliklar
-  // korunur ama Next'in otomatik ekledigi icerik kodlamasi karismasin.
   const headers = new Headers();
   upstream.headers.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase())) headers.set(key, value);
+    if (!DROP_FROM_RESPONSE.has(key.toLowerCase())) headers.append(key, value);
   });
 
   return new Response(upstream.body, {
